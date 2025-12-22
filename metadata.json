@@ -1,0 +1,5 @@
+{
+  "name": "ПГУ Dashboard",
+  "description": "Construction management dashboard for PGU project including title tracking, workforce allocation, and machinery status.",
+  "requestFramePermissions": []
+}
