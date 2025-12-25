@@ -9,7 +9,26 @@ import {
 import { AlertCircle, Users, Truck, FileCheck, Clock, AlertTriangle, CheckCircle, Briefcase } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const [dbProgress, setDbProgress] = useState<number | null>(null)
+  const [dbProgress, setDbProgress] = useState<number | null>(null);
+  const [inputProgress, setInputProgress] = useState('');
+ const saveProgress = async () => {
+  const value = parseFloat(inputProgress)
+
+  if (isNaN(value)) {
+    alert('Введите число')
+    return
+  }
+
+  const { error } = await supabase
+    .from('stats')
+    .insert([{ total_progress: value }])
+
+  if (!error) {
+    setDbProgress(value)
+    setInputProgress('')
+  }
+}
+
   const { sections, workforce, machinery, calculateStatus, getProblemsForActiveWeek, activeWeek } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
   const navigate = useNavigate();
@@ -18,11 +37,12 @@ const Dashboard: React.FC = () => {
     const timer = setInterval(() => setCurrentDate(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  useEffect(() => {
+useEffect(() => {
   const loadProgress = async () => {
     const { data, error } = await supabase
       .from('stats')
       .select('total_progress')
+      .order('created_at', { ascending: false })
       .limit(1)
       .single()
 
@@ -33,6 +53,7 @@ const Dashboard: React.FC = () => {
 
   loadProgress()
 }, [])
+
 
   // Metrics Calculation based on SECTIONS (Detailed Registry)
   const metrics = useMemo(() => {
@@ -130,6 +151,22 @@ const Dashboard: React.FC = () => {
     <p className="text-3xl font-bold text-blue-600">
       {dbProgress !== null ? `${dbProgress.toFixed(1)}%` : '—'}
     </p>
+    <div className="mt-3 flex gap-2">
+  <input
+    type="number"
+    step="0.1"
+    value={inputProgress}
+    onChange={e => setInputProgress(e.target.value)}
+    placeholder="Новый %"
+    className="w-24 px-2 py-1 border border-slate-300 rounded text-sm"
+  />
+  <button
+    onClick={saveProgress}
+    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+  >
+    Сохранить
+  </button>
+</div>
   </div>
   <div className="p-3 bg-blue-50 rounded-full text-blue-600">
     <Briefcase size={24} />
