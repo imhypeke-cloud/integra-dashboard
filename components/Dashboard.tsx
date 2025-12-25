@@ -11,7 +11,7 @@ import { AlertCircle, Users, Truck, FileCheck, Clock, AlertTriangle, CheckCircle
 const Dashboard: React.FC = () => {
   const [dbProgress, setDbProgress] = useState<number | null>(null);
   const [inputProgress, setInputProgress] = useState('');
- const saveProgress = async () => {
+const saveProgress = async () => {
   const value = parseFloat(inputProgress)
 
   if (isNaN(value)) {
@@ -21,13 +21,18 @@ const Dashboard: React.FC = () => {
 
   const { error } = await supabase
     .from('stats')
-    .insert([{ total_progress: value }])
+    .update({ total_progress: value })
+    .eq('id', 1)
 
-  if (!error) {
+  if (error) {
+    console.error(error)
+    alert('Ошибка сохранения')
+  } else {
     setDbProgress(value)
     setInputProgress('')
   }
 }
+
 
   const { sections, workforce, machinery, calculateStatus, getProblemsForActiveWeek, activeWeek } = useData();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -127,7 +132,7 @@ useEffect(() => {
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-2 gap-4">
-        <h2 className="text-3xl font-bold text-slate-800">Обзор проекта</h2>
+        <h2 className="text-3xl font-bold text-slate-800">Обзор проекта (обновлено) </h2>
         <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
            <div className="p-2 bg-blue-50 rounded-full text-blue-600">
              <Clock size={20} />
